@@ -1,11 +1,6 @@
-import { Inter, Lusitana } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
-export const inter = Inter({ subsets: ["latin"] });
-export const lusitana = Lusitana({
+export const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
 });
-
-// import { Inter } from "next/font/google";
-
-// export const inter = Inter({ subsets: ["latin"] });

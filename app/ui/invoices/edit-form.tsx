@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+import { CustomerField, InvoiceForm } from "@/app/lib/definitions";
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { Button } from '@/app/ui/button';
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Button } from "@/app/ui/button";
+import { updateInvoice } from "@/app/lib/actions";
+import { useState } from "react";
 
 export default function EditInvoiceForm({
   invoice,
@@ -17,8 +19,33 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
+  console.log("Invoice Data:", invoice); // Debugging log
+
+  const [status, setStatus] = useState<string>(invoice.status || "pending");
+  const [amount, setAmount] = useState<number>(invoice.amount || 0);
+  const [customerId, setCustomerId] = useState<string>(
+    invoice.customer_id || ""
+  );
+
+  console.log("Initial Status:", status); // Debugging log
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Submitting Invoice Update:", { status, amount, customerId });
+
+    const updatedInvoice = {
+      ...invoice,
+      status,
+      amount,
+      customer_id: customerId,
+    };
+
+    await updateInvoice(invoice.id, updatedInvoice);
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -29,8 +56,9 @@ export default function EditInvoiceForm({
             <select
               id="customer"
               name="customerId"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={invoice.customer_id}
             >
               <option value="" disabled>
                 Select a customer
@@ -57,7 +85,8 @@ export default function EditInvoiceForm({
                 name="amount"
                 type="number"
                 step="0.01"
-                defaultValue={invoice.amount}
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
                 placeholder="Enter USD amount"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               />
@@ -67,7 +96,9 @@ export default function EditInvoiceForm({
         </div>
 
         {/* Invoice Status */}
-        <fieldset>
+        <fieldset className="border-2 border-red-500 p-4">
+          {" "}
+          {/* Debugging border */}
           <legend className="mb-2 block text-sm font-medium">
             Set the invoice status
           </legend>
@@ -79,7 +110,8 @@ export default function EditInvoiceForm({
                   name="status"
                   type="radio"
                   value="pending"
-                  defaultChecked={invoice.status === 'pending'}
+                  checked={status === "pending"}
+                  onChange={(e) => setStatus(e.target.value)}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -95,7 +127,8 @@ export default function EditInvoiceForm({
                   name="status"
                   type="radio"
                   value="paid"
-                  defaultChecked={invoice.status === 'paid'}
+                  checked={status === "paid"}
+                  onChange={(e) => setStatus(e.target.value)}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -109,6 +142,8 @@ export default function EditInvoiceForm({
           </div>
         </fieldset>
       </div>
+
+      {/* Form Actions */}
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/invoices"
